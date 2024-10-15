@@ -1,10 +1,9 @@
+const todoApp = document.querySelector('.todo-app');
 const todoInput = document.querySelector('#todo-input');
 const todoForm = document.querySelector('#todo-form');
 const todoList = document.querySelector('#todo-list');
 let remaining = document.querySelector('#remaining');
 let freshLoad = true;
-// let todos = [{value: 'Mata katten', checked: true},
-//             ];
 
 function buildTodoItem(input) {
   // Create li-element with calss todo-item
@@ -109,6 +108,27 @@ function itemsRemaining() {
   remaining.textContent = `${itemsTotal - finished} items remaining.`;
 }
 
+function flash(message, color){
+  // Create div-element with class of flash
+  const newElement = document.createElement('div');
+  newElement.classList.add('flash');
+  newElement.style.backgroundColor = `var(${color})`;
+  
+  // Create paragraph that holds the message
+  const newP = document.createElement('p');
+  newP.textContent = message;
+
+  // Append paragraph to div
+  newElement.appendChild(newP);
+
+  todoApp.insertAdjacentElement("afterbegin", newElement);
+
+  setTimeout(()=>{
+    newElement.remove();
+  },3000)
+
+}
+// Check if its first time user and setup accordingly.
 if (freshLoad && readLocalStorage() === false) {
   freshLoad = false;
   createLocalStorage('saveData', '');
@@ -117,7 +137,7 @@ if (freshLoad && readLocalStorage() === false) {
   showTodos(readLocalStorage());
   itemsRemaining();
 }
-
+// Duplicate check, update localstorage and display
 todoForm.addEventListener('submit', (e) => {
   e.preventDefault;
   if (!checkDuplicateLocalStorage('saveData', todoInput.value)) {
@@ -125,10 +145,15 @@ todoForm.addEventListener('submit', (e) => {
     showTodos(readLocalStorage());
     todoInput.value = '';
     itemsRemaining();
+  } else{
+    flash('You already have that todo!', '--clr-error')
+    todoInput.value = '';
   }
 });
-
+// Add eventlistener to the ul-element
 todoList.addEventListener('click', (e) => {
+
+  //Toggle strikethrough and update localstorage.
   if (e.target.classList.contains('todo-check')) {
     let li = e.target.closest('li');
     li.querySelector('span').classList.toggle('strikethrough');
@@ -136,6 +161,7 @@ todoList.addEventListener('click', (e) => {
     itemsRemaining();
     showTodos(readLocalStorage());
   }
+  // Remove item if delete-button is clicked
   if (e.target.closest('.btn-remove')) {
     const deleteButton = e.target.closest('.btn-remove');
     if (deleteButton.contains(e.target)) {
